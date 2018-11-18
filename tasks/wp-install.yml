@@ -1,0 +1,35 @@
+---
+- name: "Download wordpress"
+  get_url:
+    url: https://wordpress.org/latest.zip
+    dest: /tmp/wordpress.zip
+- name: "Unarchive wordpress to destination"
+  unarchive:
+    src: /tmp/wordpress.zip
+    dest: /var/www
+    remote_src: yes
+
+- name: "Start service mariadb, if not started"
+  service:
+    name: mariadb
+    state: started
+    
+
+- name: "Create a new database with name 'hello_db"
+  mysql_db:
+    name: hello_db
+    state: present
+- name: "Copy apache config"
+  template:
+    src: templates/blog.conf
+    dest: /etc/httpd/conf.d/blog.conf
+ 
+- name: "Start service httpd, if not started"
+  service:
+    name: httpd
+    state: restarted
+
+- name: "Copy wp-config"
+  copy:
+    src: templates/wp-config.php
+    dest: "{{wordpress_path}}/wp-config.php"
